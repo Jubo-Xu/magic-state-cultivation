@@ -133,7 +133,6 @@ BASIS_COLOR_TO_EXTRA_COORDS = {
     'Z_': (3, 7),
 }
 
-
 def flow_to_extra_coords(flow: gen.Flow) -> list[float]:
     colors = set()
     bases = set()

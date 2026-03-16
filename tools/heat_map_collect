@@ -146,7 +146,9 @@ class CompiledLogicalErrorEdgeSampler(sinter.CompiledSampler):
                 edge_counter[str(z)] += 1
 
             for a, b in predicted_edges:
-                k2 = self.e2i[(a, b)]
+                k2 = self.e2i.get((a, b))
+                if k2 is None:
+                    continue
                 assert len(self.i2es[k2]) == 1
                 assert {self.i2es[k2][0].a, self.i2es[k2][0].b} == {a, (None if b == -1 else b)}
                 error_data[k, k2 >> 3] ^= 1 << (k2 & 7)

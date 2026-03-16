@@ -36,7 +36,7 @@ class Edge:
 
 
 def rgb_grad(p: float) -> str:
-    r, g, b, _ = plt.get_cmap('plasma')(1 - p, bytes=True)
+    r, g, b, _ = plt.get_cmap('cividis')(1 - p, bytes=True)
     r = hex(r)[2:].rjust(2, '0')
     g = hex(g)[2:].rjust(2, '0')
     b = hex(b)[2:].rjust(2, '0')
@@ -218,15 +218,25 @@ def draw_svg(
     def project(c: List[float]) -> complex:
         return (c[0] + c[1]*1j + c[2] * (0.2 + 0.1j)) * 20
 
-    min_x = min(project(e).real for e in coords.values())
-    min_y = min(project(e).imag for e in coords.values())
-    max_x = max(project(e).real for e in coords.values())
-    max_y = max(project(e).imag for e in coords.values())
-    min_x -= 40
-    min_y -= 80
-    max_x += 40
-    max_y += 40
-    center = (min_x + max_x) / 2 + (min_y + max_y) / 2 * 1j
+    graph_min_x = min(project(e).real for e in coords.values())
+    graph_min_y = min(project(e).imag for e in coords.values())
+    graph_max_x = max(project(e).real for e in coords.values())
+    graph_max_y = max(project(e).imag for e in coords.values())
+    center = (graph_min_x + graph_max_x) / 2 + (graph_min_y + graph_max_y) / 2 * 1j
+
+    min_x = graph_min_x - 40
+    min_y = graph_min_y - 40
+    max_x = graph_max_x + 40
+    max_y = graph_max_y + 40
+
+    # Reserve a dedicated right-side panel for histograms and labels.
+    hist_total_width = 100
+    hist_gap = 20
+    hist_panel_margin = 20
+    hist_base_x_1 = max_x + hist_panel_margin
+    hist_base_x_2 = hist_base_x_1 + hist_total_width + hist_gap
+    hist_base_y = min_y + 70
+    max_x = hist_base_x_2 + hist_total_width + hist_panel_margin
 
     svg = [f"""<svg viewBox="{min_x} {min_y} {max_x - min_x} {max_y - min_y}" xmlns="http://www.w3.org/2000/svg">"""]
 
@@ -242,25 +252,29 @@ def draw_svg(
         else:
             b = project(coords[e.b])
         h = edge_hits[e]
-        c = (h + 1) / (max_edge_hit + 1)
-        r = max(0.01, (h + 1) / (max_edge_hit + 1))
+        t = np.log1p(h) / np.log1p(max_edge_hit) if max_edge_hit else 0
+        c = 0.15 + 0.85 * t
+        r = 0.6 + 2.4 * t
         svg.append(f'<path '
                    f'd="M {a.real} {a.imag} L {b.real} {b.imag}" '
                    f'fill="none" '
                    f'stroke-width="{r}" '
-                   f'stroke="{rgb_grad(c)}" />')
+                   f'stroke="{rgb_grad(c)}" '
+                   f'stroke-opacity="0.9" />')
 
     max_node_hit = max(det_hits.values(), default=0)
     for k, v in coords.items():
         p = project(v)
         h = det_hits[k]
-        c = (h + 1) / (max_node_hit + 2)
-        r = max(0.1, (h + 10) / (max_node_hit + 20)) * 2
+        t = np.log1p(h) / np.log1p(max_node_hit) if max_node_hit else 0
+        c = 0.2 + 0.8 * t
+        r = 0.7 + 2.6 * t
         svg.append(f'<circle '
                    f'cx="{p.real}" '
                    f'cy="{p.imag}" '
                    f'r="{r}" '
                    f'fill="{rgb_grad(c)}" '
+                   f'fill-opacity="0.9" '
                    f'stroke="none" />')
 
     draw_histogram(
@@ -268,8 +282,8 @@ def draw_svg(
         hits=edge_hits,
         total_width=100,
         total_height=30,
-        base_x=20,
-        base_y=-40,
+        base_x=hist_base_x_1,
+        base_y=hist_base_y,
         stat=stat,
         y_label='edges in bucket',
         x_label='edge hit count bucket',
@@ -281,8 +295,8 @@ def draw_svg(
         hits=det_hits,
         total_width=100,
         total_height=30,
-        base_x=200,
-        base_y=-40,
+        base_x=hist_base_x_2,
+        base_y=hist_base_y,
         stat=stat,
         x_label='detector hit count bucket',
         y_label='nodes in bucket',
@@ -290,16 +304,16 @@ def draw_svg(
     )
 
     svg.append('<text'
-               f' x="{150}"'
-               f' y="{-12}"'
+               f' x="{(hist_base_x_1 + hist_base_x_2 + hist_total_width) / 2}"'
+               f' y="{hist_base_y + 42}"'
                ' fill="black"'
                ' font-size="6"'
                ' text-anchor="middle"'
                ' dominant-baseline="hanging"'
                f'>sampled shots={stat.shots}, sampled logical errors={stat.errors}</text>')
     svg.append('<text'
-               f' x="{150}"'
-               f' y="{-13}"'
+               f' x="{(hist_base_x_1 + hist_base_x_2 + hist_total_width) / 2}"'
+               f' y="{hist_base_y - 42}"'
                ' fill="black"'
                ' font-size="8"'
                ' text-anchor="middle"'
