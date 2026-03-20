@@ -16,38 +16,6 @@ sys.path.append(str(src_path))
 import gen
 import cultiv
 
-# def write_gap_plot(path: pathlib.Path):
-#     circuit = cultiv.make_end2end_cultivation_circuit(dcolor=5, dsurface=15, basis='Y', r_growing=5, r_end=4, inject_style='unitary')
-#     circuit = gen.NoiseModel.uniform_depolarizing(1e-3).noisy_circuit_skipping_mpp_boundaries(circuit)
-#     dec = cultiv.DesaturationSampler().compiled_sampler_for_task(sinter.Task(circuit=circuit, detector_error_model=circuit.detector_error_model()))
-
-#     scores = []
-#     for d in range(circuit.num_detectors):
-#         scores.append(dec.decode_det_set({d}))
-
-#     codes = gen.circuit_to_cycle_code_slices(circuit)
-#     ticks = codes.keys()
-#     codes = [code.with_transformed_coords(lambda e: e * (1 + 1j)) for code in codes.values()]
-
-#     max_gap = max(e for _, e in scores)
-#     def tile_coloring(tile: gen.Tile) -> tuple[float, float, float] | None:
-#         dr, = tile.flags
-#         dr = int(dr)
-#         prediction, gap = scores[dr]
-#         if gap == 0:
-#             return 0.5, 0.5, 0.5
-#         return min(gap / max_gap, 1), 0, 0
-
-#     codes[0].write_svg(
-#         path,
-#         canvas_height=1000,
-#         other=codes[1:],
-#         title=[f'tick={e}' for e in sorted(ticks)],
-#         tile_color_func=tile_coloring,
-#         show_coords=False,
-#         show_obs=False,
-#     )
-
 # The class of the Gap collect
 class GapSensitivityCollect:
     def __init__(
@@ -76,6 +44,18 @@ class GapSensitivityCollect:
             "sum_err": [],
             "mean_gap_when_active": [],
             "error_rate_when_active": [],
+        }
+        self.partial_gap_sens_data: dict[str, Any] = {
+            "remained_shots": 0,
+            "complete_gaps": [],
+            "partial_gaps": [],
+            "closest_matches": [],
+            "combos": [],
+            "left_lengths": None,
+            "top_lengths": None,
+            "t_lengths": None,
+            "mode": None,
+            "stage_name": None,
         }
         
     # Define the functions to collect the gap sensitivity data and generate the SVG plots.
@@ -214,6 +194,233 @@ class GapSensitivityCollect:
         if not self.overall_gap_scores["error_rate_when_active"]:
             raise ValueError("No overall gap data collected. Call collect_overall_gap_sens(shots=...) first.")
         return self._plot_from_svg_writer(lambda path: self.overall_detector_err_sens_svg(path))
+    
+    
+    ## Collection and Visualization for Partial Detector Gap Sensitivity
+    def collect_partial_detector_gap_sens(
+        self,
+        shots: int,
+        sampler = cultiv.DesaturationSampler(),
+        selector = None,
+        left_lengths: tuple[int, int] = (1, 1),
+        top_lengths: tuple[int, int] = (1, 1),
+        t_lengths: tuple[int, int] = (1, 1),
+        mode: str = "rectangle",
+        stage_name: str = "escape",
+    ):
+        if selector is None:
+            raise ValueError("selector is required and should be an instance of DetectorSelection3D.")
+        if shots <= 0:
+            raise ValueError("shots must be positive.")
+        l0, l1 = left_lengths
+        u0, u1 = top_lengths
+        t0, t1 = t_lengths
+        if not (l1 >= l0 and u1 >= u0 and t1 >= t0):
+            raise ValueError("Each *_lengths tuple must be (start, end) with end >= start.")
+
+        dec = sampler.compiled_sampler_for_task(
+            sinter.Task(circuit=self.circuit, detector_error_model=self.circuit.detector_error_model())
+        )
+        dets, actual_obs = dec.gap_circuit_sampler.sample(shots, separate_observables=True, bit_packed=True)
+        keep_mask = ~np.any(dets & dec._discard_mask, axis=1)
+        dets = dets[keep_mask]
+        actual_obs = actual_obs[keep_mask]
+        remained_shots = int(dets.shape[0])
+
+        if remained_shots == 0:
+            self.partial_gap_sens_data = {
+                "remained_shots": 0,
+                "complete_gaps": [],
+                "partial_gaps": [],
+                "closest_matches": [],
+                "combos": [],
+                "left_lengths": left_lengths,
+                "top_lengths": top_lengths,
+                "t_lengths": t_lengths,
+                "mode": mode,
+                "stage_name": stage_name,
+            }
+            return
+
+        _, complete_gaps = dec._decode_batch_overwrite_last_byte(bit_packed_dets=dets.copy())
+        complete_gaps = complete_gaps.astype(np.float64)
+
+        combos = [
+            (left_len, top_len, t)
+            for left_len in range(l0, l1 + 1)
+            for top_len in range(u0, u1 + 1)
+            for t in range(t0, t1 + 1)
+        ]
+
+        combo_to_gaps: dict[tuple[int, int, int], np.ndarray] = {}
+        for left_len, top_len, t in combos:
+            _, mask_packed = selector.build_color_region_mask(
+                left_len=left_len,
+                top_len=top_len,
+                t=t,
+                mode=mode,
+                stage_name=stage_name,
+            )
+            full_mask = np.zeros(dets.shape[1], dtype=np.uint8)
+            copy_n = min(len(mask_packed), len(full_mask))
+            full_mask[:copy_n] = mask_packed[:copy_n]
+
+            dets_partial = dets.copy()
+            dets_partial &= full_mask.reshape(1, -1)
+            _, partial_gaps = dec._decode_batch_overwrite_last_byte(bit_packed_dets=dets_partial)
+            combo_to_gaps[(left_len, top_len, t)] = partial_gaps.astype(np.float64)
+
+        partial_gaps_per_shot: list[dict[tuple[int, int, int], float]] = []
+        closest_matches: list[dict[str, Any]] = []
+        for shot_idx in range(remained_shots):
+            gap_map: dict[tuple[int, int, int], float] = {}
+            for combo in combos:
+                gap_map[combo] = float(combo_to_gaps[combo][shot_idx])
+            partial_gaps_per_shot.append(gap_map)
+            complete_gap = float(complete_gaps[shot_idx])
+            best_combo = min(combos, key=lambda c: abs(gap_map[c] - complete_gap))
+            best_partial = float(gap_map[best_combo])
+            closest_matches.append({
+                "shot_idx": int(shot_idx),
+                "combo": tuple(best_combo),
+                "partial_gap": best_partial,
+                "complete_gap": complete_gap,
+                "abs_diff": abs(best_partial - complete_gap),
+            })
+
+        self.partial_gap_sens_data = {
+            "remained_shots": remained_shots,
+            "complete_gaps": complete_gaps.tolist(),
+            "partial_gaps": partial_gaps_per_shot,
+            "closest_matches": closest_matches,
+            "combos": combos,
+            "left_lengths": left_lengths,
+            "top_lengths": top_lengths,
+            "t_lengths": t_lengths,
+            "mode": mode,
+            "stage_name": stage_name,
+        }
+
+    def paritial_detector_gap_sens_svg(self, shot_idx: int, out: Optional[pathlib.Path] = None, interactive: bool = True):
+        if not self.partial_gap_sens_data["partial_gaps"]:
+            raise ValueError("No partial gap data found. Call collect_partial_detector_gap_sens(...) first.")
+        remained = self.partial_gap_sens_data["remained_shots"]
+        if shot_idx < 0 or shot_idx >= remained:
+            raise ValueError(f"shot_idx out of range: 0 <= shot_idx < {remained}.")
+
+        shot_partial: dict[tuple[int, int, int], float] = self.partial_gap_sens_data["partial_gaps"][shot_idx]
+        complete_gap = float(self.partial_gap_sens_data["complete_gaps"][shot_idx])
+
+        combos = list(shot_partial.keys())
+        x = [c[0] for c in combos]
+        y = [c[1] for c in combos]
+        z = [c[2] for c in combos]
+        partial_vals = [float(shot_partial[c]) for c in combos]
+
+        all_vals = np.asarray(partial_vals + [complete_gap], dtype=np.float64)
+        vmin = float(np.min(all_vals))
+        vmax = float(np.max(all_vals))
+        if vmax <= vmin:
+            vmax = vmin + 1e-9
+
+        def scale_size(v: float, lo: float = 4.0, hi: float = 24.0) -> float:
+            norm = (v - vmin) / (vmax - vmin)
+            return float(lo + (hi - lo) * norm)
+
+        partial_sizes = [scale_size(v) for v in partial_vals]
+        complete_size = scale_size(complete_gap)
+        complete_sizes = [complete_size] * len(combos)
+
+        hover_black = [
+            f"(left,top,t)=({a},{b},{c})<br>partial_gap={g:.4f}"
+            for (a, b, c), g in zip(combos, partial_vals)
+        ]
+        hover_red = [
+            f"(left,top,t)=({a},{b},{c})<br>complete_gap={complete_gap:.4f}"
+            for (a, b, c) in combos
+        ]
+        try:
+            import plotly.graph_objects as go
+            fig = go.Figure()
+            fig.add_trace(go.Scatter3d(
+                x=x, y=y, z=z,
+                mode="markers",
+                name="Partial Gap",
+                marker=dict(size=partial_sizes, color="black", symbol="circle", opacity=0.92),
+                text=hover_black,
+                hoverinfo="text",
+            ))
+            fig.add_trace(go.Scatter3d(
+                x=x, y=y, z=z,
+                mode="markers",
+                name="Complete Gap (Reference)",
+                marker=dict(size=complete_sizes, color="rgba(0,0,0,0)", symbol="circle-open", line=dict(color="red", width=2)),
+                text=hover_red,
+                hoverinfo="text",
+            ))
+            fig.update_layout(
+                title=f"Shot {shot_idx}: Partial vs Complete Gap",
+                scene=dict(
+                    xaxis_title="left_len",
+                    yaxis_title="top_len",
+                    zaxis_title="t",
+                ),
+                legend=dict(x=0.01, y=0.99),
+                margin=dict(l=0, r=0, t=40, b=0),
+            )
+            if out is not None:
+                if out.suffix.lower() == ".html":
+                    fig.write_html(str(out))
+                elif out.suffix.lower() == ".svg":
+                    fig.write_image(str(out))
+                else:
+                    fig.write_html(str(out.with_suffix(".html")))
+            return fig
+        except ImportError as ex:
+            if interactive:
+                raise ImportError(
+                    "Interactive 3D rotation requires plotly. Install it (e.g. `pip install plotly`) "
+                    "or call with interactive=False for static matplotlib output."
+                ) from ex
+            import matplotlib.pyplot as plt
+
+            fig = plt.figure(figsize=(8, 6))
+            ax = fig.add_subplot(111, projection="3d")
+            ax.scatter(x, y, z, s=partial_sizes, c="black", alpha=0.92, label="Partial Gap")
+            ax.scatter(x, y, z, s=complete_sizes, facecolors="none", edgecolors="red", linewidths=1.5, label="Complete Gap (Reference)")
+            ax.set_xlabel("left_len")
+            ax.set_ylabel("top_len")
+            ax.set_zlabel("t")
+            ax.set_title(f"Shot {shot_idx}: Partial vs Complete Gap")
+            ax.legend(loc="upper left")
+            if out is not None:
+                if out.suffix.lower() == ".svg":
+                    fig.savefig(out, format="svg", bbox_inches="tight")
+                else:
+                    fig.savefig(out.with_suffix(".svg"), format="svg", bbox_inches="tight")
+            return fig
+
+    def partial_detector_gap_sens_svg(self, shot_idx: int, out: Optional[pathlib.Path] = None):
+        # Alias with corrected spelling.
+        return self.paritial_detector_gap_sens_svg(shot_idx=shot_idx, out=out)
+
+    def print_partial_gap_match_for_shot(self, shot_idx: int) -> dict[str, Any]:
+        if not self.partial_gap_sens_data["closest_matches"]:
+            raise ValueError("No partial gap match data found. Call collect_partial_detector_gap_sens(...) first.")
+        remained = self.partial_gap_sens_data["remained_shots"]
+        if shot_idx < 0 or shot_idx >= remained:
+            raise ValueError(f"shot_idx out of range: 0 <= shot_idx < {remained}.")
+        rec = self.partial_gap_sens_data["closest_matches"][shot_idx]
+        left_len, top_len, t = rec["combo"]
+        print(
+            f"shot_idx={rec['shot_idx']}, "
+            f"closest_combo=(left_len={left_len}, top_len={top_len}, t={t}), "
+            f"partial_gap={rec['partial_gap']:.6f}, "
+            f"complete_gap={rec['complete_gap']:.6f}, "
+            f"abs_diff={rec['abs_diff']:.6f}"
+        )
+        return rec
+    
     
     
     # Helper function to create an SVG plot from a writing function, suitable for Jupyter notebook display.
