@@ -101,9 +101,9 @@ class CompiledTwirlInterceptSampler(sinter.CompiledSampler):
 
         discard_mask = np.any(self.simulator.get_detector_flips(bit_packed=False), axis=0)
         error_mask = np.any(self.simulator.get_observable_flips(bit_packed=False), axis=0)
-        discards = np.count_nonzero(discard_mask)
-        errors = np.count_nonzero(error_mask & ~discard_mask)
-        return sinter.AnonTaskStats(shots=shots, errors=errors, discards=discards)
+        discards = int(np.count_nonzero(discard_mask))
+        errors = int(np.count_nonzero(error_mask & ~discard_mask))
+        return sinter.AnonTaskStats(shots=int(shots), errors=errors, discards=discards)
 
     def sample(self, shots: int) -> sinter.AnonTaskStats:
         t0 = time.monotonic()

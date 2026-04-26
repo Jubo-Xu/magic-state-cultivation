@@ -1,0 +1,10 @@
+{
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/algorithms",
+    "${workspaceFolder}/algorithms/prior_gap_estimation_cpp"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/algorithms",
+    "${workspaceFolder}/algorithms/prior_gap_estimation_cpp"
+  ]
+}

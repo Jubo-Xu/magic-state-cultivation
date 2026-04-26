@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/cultiv/_construction/_integration.py
+# hypothesis_version: 6.151.11
+
+['X', 'X_', 'Xb', 'Xg', 'Xr', 'Y', 'Z', 'Z_', 'Zb', 'Zg', 'Zr', '_', 'basis=', 'bell', 'color=', 'degenerate', 'postselect', 'stage=cultivation', 'stage=injection', 'unitary']

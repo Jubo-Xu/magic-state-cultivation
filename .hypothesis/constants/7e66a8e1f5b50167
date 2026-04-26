@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/cultiv/_stats_util.py
+# hypothesis_version: 6.151.11
+
+[':', '=', 'C', 'CX', 'CZ', 'DEPOLARIZE1', 'DEPOLARIZE2', 'DETECTOR', 'E', 'H', 'M', 'MPP', 'MX', 'OBSERVABLE_INCLUDE', 'QUBIT_COORDS', 'R', 'RX', 'RY', 'S', 'S_DAG', 'Stabilizer', 'Stabilizer Sim', 'TICK', 'Vector', 'Vector Sim', 'X_ERROR', 'Z_ERROR', 'b', 'error', 'gap', 'hits', 'intercept', 'sim', 'src_discards', 'src_errors', 'src_shots', 'twirl_intercept', 'twirl_intercept_t', 'vec', 'vec_intercept', 'vec_intercept_t']

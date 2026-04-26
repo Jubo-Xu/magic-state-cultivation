@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/gen/_chunk/_keyed_pauli_map.py
+# hypothesis_version: 6.151.11
+
+['I', 'KeyedPauliMap', 'X', 'Y', 'Z']

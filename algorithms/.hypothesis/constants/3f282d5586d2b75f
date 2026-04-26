@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/algorithms/parity_matrix_construct.py
+# hypothesis_version: 6.151.11
+
+[0.0, 'ParityCheckMatrices', 'decomposed', 'detectors', 'detectors_per_round', 'error', 'is_boundary', 'is_timelike', 'n_boundary', 'n_detectors', 'n_faults', 'n_observables', 'n_spacelike', 'n_timelike', 'prob', 'prob_max', 'prob_min', 'size_distribution']

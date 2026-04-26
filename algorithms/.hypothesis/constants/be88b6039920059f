@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/latte/vec_sim.py
+# hypothesis_version: 6.151.11
+
+[1e-06, 0.001, 0.5, 0.999, -180, 180, 1000, 'CX', 'CZ', 'DEPOLARIZE1', 'DEPOLARIZE2', 'DETECTOR', 'Edge mismatch at ', 'I', 'InjectedError', 'LatticeSurgeryLayer', 'M', 'MPP', 'MX', 'OBSERVABLE_INCLUDE', 'QUBIT_COORDS', 'R', 'RX', 'S', 'SHIFT_COORDS', 'TICK', 'VecSim', 'X', 'X_ERROR', 'Y', 'Z', 'Z_ERROR', '_', 'accumulator_bit_save', 'accumulator_bit_xor', 'anon', 'cx', 'error_mechanism_m', 'error_mechanism_x', 'error_mechanism_z', 'feedback_m2x', 'feedback_m2y', 'feedback_m2z', 'h', 'heralded_random_x', 'heralded_random_z', 'm_discard_x', 'm_discard_y', 'm_discard_z', 'mxx', 'mzz', 'qalloc_x', 'qalloc_y', 'qalloc_z', 's', 't', 'x', 'y', 'z', '}']

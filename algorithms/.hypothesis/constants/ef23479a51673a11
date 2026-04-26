@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/latte/lattice_surgery_layer_with_feedback.py
+# hypothesis_version: 6.151.11
+
+['&', '&&', '+', '1', '<', '=', 'CCZ', 'H', 'S', 'SQRT_X', 'SQRT_X_DAG', 'T', 'TT', 'X', 'XYZ', 'Y', 'Z', '^', '^^', '_', 'at', 'discard_shot_if', 'else', 'fail', 'feedback', 'ground_measures', 'if', 'let', 'measures', 'output_should_be', 'pass', 'print', 'reject', 'replace', 'resolve_at', 'with']

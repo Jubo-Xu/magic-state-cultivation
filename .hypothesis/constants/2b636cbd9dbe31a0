@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/cultiv/_decoding/_mux_sampler.py
+# hypothesis_version: 6.151.11
+
+[0.25, 0.5, 'chromobius-continue', 'chromobius-gap', 'desaturation', 'highlander', 'notouch', 'notouch-hope', 'pymatching-gap', 'twirl_intercept_s', 'twirl_intercept_t', 'twirl_intercept_z', 'vec_intercept_s', 'vec_intercept_t', 'vec_intercept_z']

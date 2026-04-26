@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/gen/_chunk/_builder.py
+# hypothesis_version: 6.151.11
+
+['Builder', 'CX', 'CXSWAP', 'CY', 'DETECTOR', 'MPP', 'MX', 'MY', 'MZ', 'OBSERVABLE_INCLUDE', 'QUBIT_COORDS', 'RX', 'RY', 'RZ', 'SHIFT_COORDS', 'SWAPCX', 'TICK', 'X', 'XCY', 'XCZ', 'YCX', 'YCZ', 'Z', '__len__', 'gen.PauliMap']

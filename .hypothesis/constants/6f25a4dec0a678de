@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/gen/_layers/_measure_layer.py
+# hypothesis_version: 6.151.11
+
+['H', 'H_YZ', 'I', 'Layer', 'M', 'MeasureLayer', 'X', 'Z']

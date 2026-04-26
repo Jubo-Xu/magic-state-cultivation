@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/cultiv/_error_enumeration_report.py
+# hypothesis_version: 6.151.11
+
+['    cache miss', ',', 'ENTRY ', 'dem.num_errors == 0', 'inf', 'r']

@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/gen/_layers/_layer_circuit.py
+# hypothesis_version: 6.151.11
+
+['\n])', ',', 'CX', 'CXSWAP', 'CY', 'CZ', 'DEPOLARIZE1', 'DEPOLARIZE2', 'DETECTOR', 'I', 'ISWAP', 'ISWAP_DAG', 'LayerCircuit', 'M', 'MPP', 'MR', 'MRX', 'MRY', 'MX', 'MY', 'OBSERVABLE_INCLUDE', 'QUBIT_COORDS', 'R', 'RX', 'RY', 'SHIFT_COORDS', 'SQRT_XX', 'SQRT_XX_DAG', 'SQRT_YY', 'SQRT_YY_DAG', 'SQRT_ZZ', 'SQRT_ZZ_DAG', 'SWAP', 'SWAPCX', 'TICK', 'TLayer', 'X', 'XCX', 'XCY', 'XCZ', 'X_ERROR', 'Y', 'YCX', 'YCY', 'YCZ', 'Y_ERROR', 'Z', 'Z_ERROR']

@@ -21,11 +21,11 @@ class CompiledPerfectionistSampler(sinter.CompiledSampler):
             bit_packed=True,
             separate_observables=True,
         )
-        num_shots = dets.shape[0]
+        num_shots = int(dets.shape[0])
         discards = np.any(dets, axis=1)
         errors = np.any(obs, axis=1)
-        num_discards = np.count_nonzero(discards)
-        num_errors = np.count_nonzero(errors & ~discards)
+        num_discards = int(np.count_nonzero(discards))
+        num_errors = int(np.count_nonzero(errors & ~discards))
         t1 = time.monotonic()
 
         return sinter.AnonTaskStats(

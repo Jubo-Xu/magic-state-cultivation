@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/gen/_chunk/_noise.py
+# hypothesis_version: 6.151.11
+
+['*', 'DEPOLARIZE1', 'DEPOLARIZE2', 'DETECTOR', 'IXYZ', 'M', 'MPAD', 'MPP', 'MR', 'MRX', 'MRY', 'MRZ', 'MX', 'MXX', 'MY', 'MYY', 'MZ', 'MZZ', 'NoiseModel', 'OBSERVABLE_INCLUDE', 'QUBIT_COORDS', 'R', 'RX', 'RY', 'SHIFT_COORDS', 'TICK', 'X', 'XX', 'XY', 'XZ', 'X_ERROR', 'Y', 'YX', 'YY', 'YZ', 'Z', 'ZX', 'ZY', 'ZZ', 'Z_ERROR', 'end <= start']

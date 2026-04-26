@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/cultiv/_construction/_escape_stage.py
+# hypothesis_version: 6.151.11
+
+['CX', 'MX', 'MZ', 'RX', 'RZ', 'TICK', 'X', 'XZ', 'Y', 'Z', 'all', 'auto', 'basis=X', 'basis=Z', 'color=b', 'color=g', 'color=r', 'cycle=bell-flagged-X', 'cycle=bell-flagged-Z', 'cycle=shingle', 'cycle=superdense', 'left', 'lost-to-transition', 'right', 'transition', 'x-top-z-bottom-right']

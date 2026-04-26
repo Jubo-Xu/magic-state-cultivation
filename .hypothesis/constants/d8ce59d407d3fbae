@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/gen/_chunk/_chunk_compiler.py
+# hypothesis_version: 6.151.11
+
+['    det_flows {', '    discard_flows {', '    obs_flows {', '    }', 'Actual inputs {', 'ChunkCompiler', 'ChunkCompiler {', 'DETECTOR', 'Needed inputs {', 'OBSERVABLE_INCLUDE', 'QUBIT_COORDS', 'REPEAT', 'SHIFT_COORDS', 'TICK', 'discard', '}']

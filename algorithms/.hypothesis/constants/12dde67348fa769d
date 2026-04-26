@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/cultiv/_construction/_injection_stage.py
+# hypothesis_version: 6.151.11
+
+[0.5, 'I', 'MPP', 'S', 'S_DAG', 'X', 'Y', 'Z', 'stage=inject']

@@ -1,0 +1,29 @@
+{
+  "version": 4,
+  "configurations": [
+    {
+      "name": "Linux",
+      "intelliSenseMode": "linux-gcc-x64",
+      "compilerPath": "/usr/bin/g++",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "includePath": [
+        "${workspaceFolder}/algorithms/prior_gap_estimation_cpp/src",
+        "${workspaceFolder}/**",
+        "/home/bobxu_0712/miniforge3/envs/basic_quantum/include/python3.12",
+        "/home/bobxu_0712/miniforge3/envs/basic_quantum/lib/python3.12/site-packages/pybind11/include",
+        "/usr/local/include",
+        "/usr/include"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}",
+          "/home/bobxu_0712/miniforge3/envs/basic_quantum/include/python3.12",
+          "/home/bobxu_0712/miniforge3/envs/basic_quantum/lib/python3.12/site-packages/pybind11/include"
+        ],
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "defines": []
+    }
+  ]
+}

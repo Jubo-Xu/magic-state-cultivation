@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/gen/_chunk/_circuit_util.py
+# hypothesis_version: 6.151.11
+
+['?', 'CX', 'CY', 'CZ', 'DETECTOR', 'E', 'M', 'MPAD', 'MPP', 'MX', 'MZ', 'OBSERVABLE_INCLUDE', 'QUBIT_COORDS', 'R', 'RX', 'SHIFT_COORDS', 'TICK', 'X', 'XCZ', 'Y', 'YCZ', 'Z', '_XYZ', 'error', 'feedback', 'gen.StabilizerCode', 'sweep']

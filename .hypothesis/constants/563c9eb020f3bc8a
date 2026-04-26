@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/latte/lattice_surgery_instruction.py
+# hypothesis_version: 6.151.11
+
+['0', 'X', 'Z', 'accumulator_bit_save', 'accumulator_bit_xor', 'after', 'before', 'cx', 'during', 'error_mechanism_m', 'error_mechanism_x', 'error_mechanism_y', 'error_mechanism_z', 'feedback_m2x', 'feedback_m2y', 'feedback_m2z', 'h', 'heralded_random_x', 'heralded_random_z', 'm_discard_x', 'm_discard_y', 'm_discard_z', 'mxx', 'mzz', 'qalloc_x', 'qalloc_y', 'qalloc_z', 's', 't', 'x', 'y', 'z']

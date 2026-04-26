@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/gen/_chunk/_chunk.py
+# hypothesis_version: 6.151.11
+
+[0.001, '    (signed) ', '    (unsigned) ', ')', 'Chunk', 'ChunkInterface', 'ChunkLoop', 'ChunkReflow', 'DETECTOR', 'Incompatible chunks.', 'MPP', 'OBSERVABLE_INCLUDE', 'Patch', 'QUBIT_COORDS', 'SHIFT_COORDS', 'StabilizerCode', 'TICK', 'Tile', 'Unmatched reflows.', '_XYZ', 'actual_end_interface', 'discard', 'end', 'end <= start', 'gen.Chunk(', 'start']

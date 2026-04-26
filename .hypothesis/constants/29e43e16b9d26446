@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/cultiv/_construction/_color_code.py
+# hypothesis_version: 6.151.11
+
+[0.1, 0.25, 0.5, 0.6, 'CX', 'MX', 'MZ', 'RX', 'RZ', 'TICK', 'X', 'XZ', 'Y', 'Z', 'all', 'auto', 'bell-adjacent', 'bell-common-neighbor', 'bottom-left', 'bottom-right', 'color=b', 'color=g', 'color=r', 'top', 'x-top-z-bottom-right']

@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/gen/_chunk/_stabilizer_code.py
+# hypothesis_version: 6.151.11
+
+[0.001, ',\n', ',\n]', '3couplerspecial', 'DEPOLARIZE1', 'Flow', 'MPP', 'Patch', 'PauliMap', 'StabilizerCode', 'X', 'XZ', 'Y', 'Z', '[\n', '__!not_specified', 'auto', 'circles', 'end', 'error', 'gen.Chunk', 'gen.ChunkInterface', 'gen.Flow', 'gen.Tile', 'init', 'obs', 'passthrough', 'polygon', 'undirected']

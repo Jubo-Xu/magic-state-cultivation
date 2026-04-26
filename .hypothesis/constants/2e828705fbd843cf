@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/latte/zx_graph.py
+# hypothesis_version: 6.151.11
+
+['H', 'Leftover', 'S_port', 'T_port', 'X', 'XZ', 'Y', 'Z', 'ZXGraph', '_XYZ', 'in', 'in_port', 'out', 'out_port', 'phase', 'type', 'x_sink', 'z_sink']

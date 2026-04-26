@@ -100,15 +100,45 @@ class RuntimeEstimator:
         self.attempt_count = 0
         self.stage_pass_counts = np.zeros(self.num_stages, dtype=np.int64)
         self.decode_call_times_ns: list[float] = []
+        self.accepted_actual_obs: list[int] = []
+        self.accepted_predict_obs: list[int] = []
+        self.logical_error_rate = 0
         self._simulated = False
 
-    def estimate_runtime(self) -> None:
+    def estimate_runtime(
+        self,
+        gap_check: bool = True,
+        *,
+        partial_mask: bool = False,
+        selector: Optional[Any] = None,
+        left_len: int = 1,
+        top_len: int = 1,
+        t: int = 1,
+        mode: str = "rectangle",
+        stage_name: str = "escape",
+        decoder_time_measure_mode = "serial"
+    ) -> None:
         for k in self.records_first_reach:
             self.records_first_reach[k][:] = np.nan
             self.records_until_success[k][:] = 0.0
         self.attempt_count = 0
         self.stage_pass_counts[:] = 0
         self.decode_call_times_ns = []
+        self.accepted_actual_obs = []
+        self.accepted_predict_obs = []
+
+        decode_mask_bool: Optional[np.ndarray] = None
+        if partial_mask:
+            if selector is None:
+                raise ValueError("selector is required when partial_mask=True.")
+            mask_bool, _ = selector.build_color_region_mask(
+                left_len=left_len,
+                top_len=top_len,
+                t=t,
+                mode=mode,
+                stage_name=stage_name,
+            )
+            decode_mask_bool = np.asarray(mask_bool, dtype=np.bool_)
 
         for e in range(self.epoch):
             acc = {"total": 0.0, "gate": 0.0, "feedback": 0.0, "decode": 0.0}
@@ -116,7 +146,7 @@ class RuntimeEstimator:
             success = False
 
             while not success:
-                det_set, fail_stage = self._run_single_attempt_until_postselect()
+                det_set, fail_stage, actual_obs = self._run_single_attempt_until_postselect()
                 self.attempt_count += 1
 
                 if fail_stage is not None:
@@ -134,17 +164,37 @@ class RuntimeEstimator:
                     self._add_gate_stage(acc, s)
                     self._record_stage(e, s, acc, first_seen)
 
-                _, gap, decode_ns = self._decode_with_timing(det_set)
+                det_set_for_decode = det_set
+                if decode_mask_bool is not None:
+                    det_set_for_decode = {d for d in det_set if d < len(decode_mask_bool) and decode_mask_bool[d]}
+                pred_obs, gap, decode_ns = self._decode_with_timing(det_set_for_decode, measure_mode=decoder_time_measure_mode)
                 self._add_decode(acc, decode_ns)
                 self._record_stage(e, self.wait_stage_idx, acc, first_seen)
                 self.stage_pass_counts[self.wait_stage_idx] += 1
-                if gap >= self.gap_threshold:
+                if gap_check:
+                    if gap >= self.gap_threshold:
+                        self._record_stage(e, self.ready_stage_idx, acc, first_seen)
+                        self.stage_pass_counts[self.ready_stage_idx] += 1
+                        if actual_obs is None:
+                            raise ValueError("Expected actual observable for accepted attempt, but got None.")
+                        self.accepted_actual_obs.append(int(actual_obs))
+                        if partial_mask:
+                            pred_obs, _ = self.compiled.decode_det_set(det_set)
+                        self.accepted_predict_obs.append(int(pred_obs))
+                        success = True
+                    else:
+                        self._add_feedback(acc)
+                else:
                     self._record_stage(e, self.ready_stage_idx, acc, first_seen)
                     self.stage_pass_counts[self.ready_stage_idx] += 1
+                    if actual_obs is None:
+                        raise ValueError("Expected actual observable for accepted attempt, but got None.")
+                    self.accepted_actual_obs.append(int(actual_obs))
+                    self.accepted_predict_obs.append(int(pred_obs))
                     success = True
-                else:
-                    self._add_feedback(acc)
-
+        errs = [a != p for a, p in zip(self.accepted_actual_obs, self.accepted_predict_obs)]
+        assert len(errs) == self.epoch
+        self.logical_error_rate = float(np.mean(errs))
         self._simulated = True
 
     def calculate_mean(self, record_type: str = "until_success") -> dict[str, np.ndarray]:
@@ -415,7 +465,7 @@ class RuntimeEstimator:
             ys.append(float(v))
         return np.array(xs), np.array(ys)
 
-    def _run_single_attempt_until_postselect(self) -> tuple[set[int], Optional[int]]:
+    def _run_single_attempt_until_postselect(self) -> tuple[set[int], Optional[int], Optional[int]]:
         sim = stim.FlipSimulator(batch_size=1, num_qubits=self.circuit.num_qubits)
         sim.clear()
         det_fired: set[int] = set()
@@ -432,7 +482,11 @@ class RuntimeEstimator:
                 cur_det += 1
             if fail_stage is not None:
                 break
-        return det_fired, fail_stage
+
+        actual_obs: Optional[int] = None
+        if fail_stage is None and self.circuit.num_observables > 0:
+            actual_obs = int(sim.get_observable_flips(observable_index=0)[0])
+        return det_fired, fail_stage, actual_obs
 
     def _record_stage(self, epoch_idx: int, stage_idx: int, acc: dict[str, float], first_seen: np.ndarray) -> None:
         for k in ["total", "gate", "feedback", "decode"]:
@@ -455,11 +509,12 @@ class RuntimeEstimator:
         acc["decode"] += decode_time_ns
         acc["total"] += decode_time_ns
 
-    def _decode_with_timing(self, det_set: set[int]) -> tuple[Any, int, float]:
-        t0 = time.perf_counter_ns()
-        obs, gap = self.compiled.decode_det_set(det_set)
-        t1 = time.perf_counter_ns()
-        measured_ns = float(max(t1 - t0, 0))
+    def _decode_with_timing(self, det_set: set[int], measure_mode: str = "serial") -> tuple[Any, int, float]:
+        # t0 = time.perf_counter_ns()
+        # obs, gap = self.compiled.decode_det_set(det_set)
+        # t1 = time.perf_counter_ns()
+        # measured_ns = float(max(t1 - t0, 0))
+        obs, gap, measured_ns = self.compiled.decode_det_set_with_time(det_set, measure_mode=measure_mode)
         decode_ns = measured_ns if self.use_measured_decode_time else self.decoder_latency_ns
         self.decode_call_times_ns.append(decode_ns)
         return obs, int(gap), float(decode_ns)

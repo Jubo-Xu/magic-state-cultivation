@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/latte/lattice_script.py
+# hypothesis_version: 6.151.11
+
+[0.5, '\n=====', '#', '=====', 'LatticeScript', 'correct', 'pass', 'pygltflib.GLTF2']

@@ -1,0 +1,4 @@
+# file: /home/bobxu_0712/Documents/quantum_research/magic-state-cultivation/src/cultiv/_construction/_cultivation_stage.py
+# hypothesis_version: 6.151.11
+
+['Y', 'all', 'bell', 'degenerate', 'stage=cultivation', 'unitary']
